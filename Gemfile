@@ -54,5 +54,3 @@ group :development, :test do
   # Faker
   gem "faker"
 end
-
-

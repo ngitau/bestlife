@@ -4,5 +4,5 @@ class CustomAttribute < ApplicationRecord
   validates :key, :value, presence: true
   validates :key, uniqueness: { scope: %i[attributable_type attributable_id] }
 
-  normalizes :key, with: -> (value) { value.strip.downcase }
+  normalizes :key, with: ->(value) { value.strip.downcase }
 end

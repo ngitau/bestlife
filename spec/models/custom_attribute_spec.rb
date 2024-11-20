@@ -1,5 +1,5 @@
 describe CustomAttribute do
-  it {should belong_to(:attributable) }
+  it { should belong_to(:attributable) }
 
   it { should validate_presence_of(:key) }
   it { should validate_presence_of(:value) }
