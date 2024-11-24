@@ -63,11 +63,32 @@ shared_examples_for 'attributable' do
 
       context 'when custom attribute with given key exists' do
         it 'returns the custom attribute' do
-          create(:custom_field, name: key, associated_model:)
+          described_class.create_custom_field(key:)
           customizable_object.set_custom_attribute(key:, value:)
 
           expect(subject).to eq(value)
         end
+      end
+    end
+
+    describe '.set_custom_field' do
+      subject { described_class.create_custom_field(key:) }
+
+      context 'when no custom field with given key exists' do
+        it { expect { subject }.to change { CustomField.by_model(associated_model:).count }.by(1) }
+      end
+
+      context 'when a custom field with given key exists' do
+        it 'raises a RecordInvalid exception' do
+          described_class.create_custom_field(key:)
+          expect { subject }.to raise_error ActiveRecord::RecordInvalid
+        end
+      end
+
+      context 'when key is blank' do
+        let(:key) { '' }
+
+        it { is_expected.to be_nil }
       end
     end
   end
