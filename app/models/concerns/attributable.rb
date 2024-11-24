@@ -18,4 +18,13 @@ module Attributable
 
     custom_attributes.find_by(key:).try(:value)
   end
+
+  class_methods do
+    def create_custom_field(key:)
+      return nil if key.blank?
+
+      associated_model = self.name.underscore
+      CustomField.create!(associated_model:, name: key)
+    end
+  end
 end
