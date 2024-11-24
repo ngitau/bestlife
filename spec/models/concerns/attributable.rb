@@ -79,16 +79,18 @@ shared_examples_for 'attributable' do
       end
 
       context 'when a custom field with given key exists' do
-        it 'raises a RecordInvalid exception' do
+        it 'returns the already created custom field' do
           described_class.create_custom_field(key:)
-          expect { subject }.to raise_error ActiveRecord::RecordInvalid
+
+          expect { subject }.not_to change { CustomField.by_model(associated_model:).count }
         end
       end
 
-      context 'when key is blank' do
+      context 'when invalid attributes are provided' do
         let(:key) { '' }
 
-        it { is_expected.to be_nil }
+        it { is_expected.to be_invalid }
+        it { expect(subject.errors.full_messages).to include match(/can't be blank/) }
       end
     end
   end

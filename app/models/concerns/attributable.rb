@@ -21,10 +21,14 @@ module Attributable
 
   class_methods do
     def create_custom_field(key:)
-      return nil if key.blank?
-
       associated_model = self.name.underscore
-      CustomField.create!(associated_model:, name: key)
+      custom_field = CustomField.find_or_initialize_by(associated_model:, name: key)
+
+      if custom_field.new_record? && custom_field.valid?
+        return custom_field.save! && custom_field
+      end
+
+      custom_field
     end
   end
 end
