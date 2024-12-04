@@ -3,14 +3,15 @@ module Attributable
 
   included do
     has_many :custom_attributes, as: :attributable, dependent: :destroy
+
+    define_custom_field_methods
   end
 
   def set_custom_attribute(key:, value:)
     custom_attribute = custom_attributes.find_or_initialize_by(key:)
-    validate_key!(custom_attribute:, key:)
-    return custom_attribute if custom_attribute.errors.any?
-
     custom_attribute.value = value
+    return custom_attribute unless custom_attribute.valid?
+
     custom_attribute.save!
   end
 
@@ -20,20 +21,28 @@ module Attributable
     custom_attributes.find_by(key:).try(:value)
   end
 
-  private
+  class_methods do
+    def create_custom_field(key:)
+      associated_model = self.name.underscore
+      custom_field = CustomField.find_or_initialize_by(associated_model:, name: key)
 
-  def custom_fields
-    associated_model = self.class.name.underscore
-    CustomField.by_model(associated_model:)
-  end
+      if custom_field.new_record? && custom_field.valid?
+        return custom_field.save! && custom_field
+      end
 
-  def validate_key!(custom_attribute:, key:)
-    if key.blank?
-      custom_attribute.errors.add(:key, :blank)
-    elsif custom_fields.blank?
-      custom_attribute.errors.add(:key, :custom_fields_not_set)
-    elsif !key.in?(custom_fields)
-      custom_attribute.errors.add(:key, :invalid_key)
+      custom_field
+    end
+
+    def define_custom_field_methods
+      CustomField.by_model(associated_model: self.name.underscore).each do |cf|
+        define_method(cf.to_sym) do
+          get_custom_attribute(key: cf)
+        end
+
+        define_method("#{cf}=".to_sym) do |value|
+          set_custom_attribute(key: cf, value:)
+        end
+      end
     end
   end
 end

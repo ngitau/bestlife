@@ -1,5 +1,5 @@
 shared_examples_for 'attributable' do
-  it { should have_many(:custom_attributes) }
+  it { should have_many(:custom_attributes).dependent(:destroy) }
 
   describe 'methods' do
     let(:associated_model) { described_class.name.underscore }
@@ -63,11 +63,34 @@ shared_examples_for 'attributable' do
 
       context 'when custom attribute with given key exists' do
         it 'returns the custom attribute' do
-          create(:custom_field, name: key, associated_model:)
+          described_class.create_custom_field(key:)
           customizable_object.set_custom_attribute(key:, value:)
 
           expect(subject).to eq(value)
         end
+      end
+    end
+
+    describe '.set_custom_field' do
+      subject { described_class.create_custom_field(key:) }
+
+      context 'when no custom field with given key exists' do
+        it { expect { subject }.to change { CustomField.by_model(associated_model:).count }.by(1) }
+      end
+
+      context 'when a custom field with given key exists' do
+        it 'returns the already created custom field' do
+          described_class.create_custom_field(key:)
+
+          expect { subject }.not_to change { CustomField.by_model(associated_model:).count }
+        end
+      end
+
+      context 'when invalid attributes are provided' do
+        let(:key) { '' }
+
+        it { is_expected.to be_invalid }
+        it { expect(subject.errors.full_messages).to include match(/can't be blank/) }
       end
     end
   end
