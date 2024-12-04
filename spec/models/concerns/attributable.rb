@@ -1,5 +1,5 @@
 shared_examples_for 'attributable' do
-  it { should have_many(:custom_attributes) }
+  it { should have_many(:custom_attributes).dependent(:destroy) }
 
   describe 'methods' do
     let(:associated_model) { described_class.name.underscore }
