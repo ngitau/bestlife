@@ -3,6 +3,8 @@ module Attributable
 
   included do
     has_many :custom_attributes, as: :attributable, dependent: :destroy
+
+    define_custom_field_methods
   end
 
   def set_custom_attribute(key:, value:)
@@ -29,6 +31,18 @@ module Attributable
       end
 
       custom_field
+    end
+
+    def define_custom_field_methods
+      CustomField.by_model(associated_model: self.name.underscore).each do |cf|
+        define_method(cf.to_sym) do
+          get_custom_attribute(key: cf)
+        end
+
+        define_method("#{cf}=".to_sym) do |value|
+          set_custom_attribute(key: cf, value:)
+        end
+      end
     end
   end
 end
