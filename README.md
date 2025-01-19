@@ -3,14 +3,39 @@
 Persist any custom attributes against any model in a database.
 
 ## Guidelines
-- do not create a new database field (column) for each custom attribute
-- the custom attributes can always be strings and should always be present
-- provide a means for the users to store and query this data
-- the configuration which _model_ allows for which custom attribute should live in the database as it would be editable
-- users need to be able to query the custom attribute using pure SQL, so serialising custom
-  attributes into JSON is would be impractical
-- the solution should be re-usable in multiple models
-- use SQLite as relational storage engine for your solution
+As we partner with many different companies, we often get requests to store some kind of custom data on
+specific models. The data is different between partners, and the models they wish to store it against can
+also change. Because these data points are specific to a single partner instance we do not want to
+normalise these attributes into our database, i.e. we do not want to create a new database field for each
+custom attribute. Nonetheless we want to provide a means for the users to store and query this data using
+their relational database engine.
+
+Given example models that partners might want to extend with customer attributes:
+  - `Customer name:string phone_number:string`
+  - `Battery capacity:int`
+
+Your task is to implement a Concern (or any comparable pattern) that can be re-used in multiple models
+(i.e. in the ones given above) to encapsulate the logic necessary to store custom attributes. For simplicity
+those custom attributes can always be strings and should always be present. No interface component
+needs to be developed, the configuration which Model allows for which custom attribute should live in the
+database as it would be editable by users if we would add a configuration interface.
+
+For testing imagine two partners: The first partner might only want to add `email:string` to their Customer
+model, the second partner might want to add `hometown:string` to Customer as well as `make:string` and
+`model:string` to Battery.
+
+Bear in mind that the example schema mentioned above is really just for illustration. The challenge is to
+implement a solution that can handle _any_ custom attributes stored against _any_ model. Also:
+- There is no need to model the partners themselves as they all will use individual instances of your
+  Rails application.
+- Users need to be able to query the custom attribute using pure SQL, so serialising custom
+  attributes into JSON is would be impractical.
+- Please use SQLite as relational storage engine for your solution to spare us the need to spin up
+  your favourite DBMS.
+- Add a detailed README describing your solution.
+
+Please implement your solution inside an empty rails app, and share your solution either as zip file or in a
+publicly accessible repository, e.g. on GitHub for review.
 
 ## Getting Started
 ### Prerequisites
